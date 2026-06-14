@@ -1,0 +1,8 @@
+# Path configuration
+path: f:\PPG\Datasets\YOLO_Datasets\Final\  # dataset root dir
+train: train/images          # train images (relative to 'path')
+val: val/images              # val images (relative to 'path')
+test: test/images            # test images (relative to 'path'), Optional
+
+nc: 1
+names: ['sapatilha']
