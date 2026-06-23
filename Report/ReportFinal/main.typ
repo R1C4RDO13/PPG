@@ -30,10 +30,12 @@
     Este trabalho investiga a viabilidade da utilização de dados puramente sintéticos no treino de modelos de deteção de objetos aplicáveis a contexto real. A partir de um modelo 3D de uma sapatilha desportiva, reconstruído por fotogrametria a partir do objeto real, foram desenvolvidos cenários virtuais em Unreal Engine e construído um _pipeline_ de geração e anotação automática de imagens sintéticas. Dois detetores YOLO26n independentes foram treinados, um exclusivamente com dados sintéticos e outro com fotografias reais, e avaliados sobre um conjunto de teste real comum. O modelo treinado apenas com dados sintéticos igualou ou superou o modelo treinado com dados reais em três das quatro métricas consideradas, demonstrando que a geração de dados sintéticos constitui uma alternativa viável e económica à recolha e anotação manual de imagens reais.
    ],
 
-  keywords: ("dados sintéticos", "deteção de objetos", "YOLO", "Unreal Engine", "fotogrametria"),  appendix: include "attachments.typ",
+  keywords: ("dados sintéticos", "deteção de objetos", "YOLO", "Unreal Engine", "fotogrametria"),
+  appendix: include "attachments.typ",
 )
 
 #set text(lang: "pt", region: "PT")
+#set heading(supplement: [Secção])
 
 = Introdução
 
@@ -52,6 +54,8 @@ Com isto, pretende-se validar dois pontos fundamentais:
 + a possibilidade de utilizar imagens sintéticas no treino de modelos de deteção de objetos reais;
 + a possibilidade de o fazer de forma automatizada e rápida, a uma fração do custo necessário para a recolha e anotação de imagens reais equivalentes.
 
+O presente relatório encontra-se organizado da seguinte forma: após a presente introdução e a apresentação das tecnologias utilizadas, descreve-se a modelação 3D do objeto (@sec_modelacao); segue-se a geração dos cenários sintéticos (@sec_cenarios) e as duas rotinas de recolha e anotação automática de imagens (@sec_recolha_sintetica); descreve-se depois a recolha das imagens reais (@sec_recolha_real) e o treino dos dois modelos de deteção (@sec_treino); por fim, apresentam-se a comparação dos resultados e as limitações identificadas (@sec_comparacao), as conclusões (@sec_conclusoes) e o trabalho futuro (@sec_futuro).
+
 === Tecnologias utilizadas
 
 ==== Kiri Engine
@@ -63,8 +67,6 @@ O Kiri Engine é uma aplicação móvel e _web_ de digitalização 3D desenvolvi
 O Unreal Engine é um motor de jogo desenvolvido pela Epic Games, amplamente utilizado na indústria de videojogos e em áreas como a produção virtual e a visualização arquitetónica, graças às suas capacidades de renderização em tempo real, simulação física e criação procedimental de mundos. Neste projeto, foi utilizado para a composição de cenários virtuais e para a renderização automatizada das imagens sintéticas do _dataset_, recorrendo apenas a uma fração reduzida das suas funcionalidades.
 
 A opção por esta plataforma justifica-se pela sua grande popularidade, que se traduz numa abundância de documentação e de informação de suporte disponível, pela sua acessibilidade a utilizadores sem experiência prévia (_beginner-friendly_), e pela extensa biblioteca de _assets_ gratuitos disponibilizada pela comunidade, fator essencial para a produção dos cenários utilizados.
-
-#pagebreak()
 
 ==== Roboflow
 
@@ -78,7 +80,7 @@ O YOLO26 é a geração mais recente da família de modelos de deteção de obje
 
 Neste projeto optámos pela variante _nano_ (*YOLO26n*), a mais leve da família, por implicar menor tempo necessário para treino e menor exigência computacional, sendo também, em teoria, a que apresenta maior facilidade em aprender o objeto em causa, tratando-se da deteção de uma única categoria. Não sendo o foco deste trabalho a avaliação comparativa do modelo de deteção, não se considerou necessário validar outras variantes. Os modelos YOLO da Ultralytics são, de resto, amplamente reconhecidos no domínio da deteção de objetos e estão disponíveis gratuitamente para utilização em contexto académico.
 
-= Modelação e escolha do objeto
+= Modelação e escolha do objeto <sec_modelacao>
 
 == Escolha do objeto e contexto
 
@@ -90,7 +92,7 @@ Em vez de se modelar o objeto do zero através de _software_ de escultura 3D, op
 
 A fotogrametria consiste na reconstrução de um modelo tridimensional a partir de um conjunto de fotografias do objeto captadas de múltiplos ângulos. Para o efeito, foram captadas 61 fotografias da sapatilha, cobrindo as várias faces e perspetivas do objeto e garantindo sobreposição suficiente entre imagens consecutivas para uma reconstrução coerente. A partir destas imagens, o Kiri Engine gera uma malha texturizada que reproduz a geometria e o aspeto visual do objeto real, preservando as variações cromáticas em branco e vermelho que o caracterizam.
 
-A principal vantagem desta abordagem reside na rapidez do processo e no realismo das texturas obtidas, que derivam diretamente de fotografias reais e não de materiais sintetizados manualmente. Em contrapartida, a reconstrução apresentou limitações na zona da sola: por ser a superfície de contacto com o solo durante a captação, ficou parcialmente oculta e foi reconstruída com menor qualidade, exigindo correção posterior.
+A principal vantagem desta abordagem reside na rapidez do processo e no realismo das texturas obtidas, que derivam diretamente de fotografias reais e não de materiais sintetizados manualmente. A reconstrução apresentou, no entanto, limitações na zona da sola: por ser a superfície de contacto com o solo durante a captação, ficou parcialmente oculta e foi reconstruída com menor qualidade, exigindo correção posterior.
 
 #figure(
   grid(
@@ -176,7 +178,7 @@ O resultado deste fluxo de trabalho foi um modelo 3D texturizado e geometricamen
 
 #pagebreak()
 
-= Geração dos cenários sintéticos
+= Geração dos cenários sintéticos <sec_cenarios>
 
 Após a modelação do objeto, seguiu-se a criação dos cenários sintéticos. O principal objetivo desta etapa era perceber como o modelo se comportaria em diferentes contextos, pelo que se optou por desenvolver cenários tanto para ambientes interiores como para ambientes exteriores. Tendo em conta que a construção de cada cenário a partir do zero implicaria um investimento de tempo desproporcionado face aos objetivos principais do trabalho, optou-se por recorrer a _assets_ já existentes, adequados à estratégia definida. Concluída a criação dos cenários, procedeu-se à integração do objeto nos mesmos, dando-se então início à recolha das imagens.
 
@@ -212,7 +214,7 @@ Os cenários Natureza 2#footnote[#link("https://fab.com/s/7ee8c5704aaa")] e Inte
 ) <fig_cenarios2>
 
 
-= Recolha de imagens sintéticas
+= Recolha de imagens sintéticas <sec_recolha_sintetica>
 
 A recolha das imagens sintéticas foi realizada através do uso de _Blueprints_ no Unreal Engine, em conjunto com materiais emissivos customizados.
 
@@ -332,9 +334,7 @@ emissivo puro para um tom alaranjado (aproximadamente $R = 254$, $G = 84$, $B =
 assinatura cromática específica. Um píxel é classificado como pertencente ao
 objeto quando satisfaz, em simultâneo, as seguintes condições:
 
-#grid(
-  columns: auto,
-  [
+#align(center)[
   #table(
   columns: (auto, auto),
   align: (left, left),
@@ -345,8 +345,7 @@ objeto quando satisfaz, em simultâneo, as seguintes condições:
   [$R - G >= 80$], [Garante cor saturada (não acinzentada)],
   [$R - B >= 140$], [Distingue o objeto de tons neutros],
 )
-  ]
-)
+]
 
 Estes limiares foram calibrados a partir de medições diretas sobre as máscaras
 reais, assegurando que a deteção isola a sapatilha sem capturar elementos do
@@ -541,7 +540,7 @@ Foi assim desenvolvida, dentro da _Blueprint_, uma rotina destinada a automatiza
 
 === Pós-processamento da Rotina 2
 
-À semelhança do processo desenvolvido para a rotina anterior (@pos_process1), foi necessário o desenvolvimento de uma rotina para o processamento das imagens e máscaras extraídas nesta rotina, implementada no _notebook_ `MaskPreparation.ipynb`. Esta rotina segue a mesma lógica geral --- deteção dos píxeis correspondentes ao objeto, cálculo de uma _bounding box_ e produção da anotação no formato YOLO ---, introduzindo, no entanto, alterações relevantes na forma como a deteção de oclusão (@oclusao) é tratada.
+Tal como na rotina anterior (@pos_process1), as imagens e máscaras extraídas exigiram uma fase de processamento, implementada no _notebook_ `MaskPreparation.ipynb`. Esta segue a mesma lógica geral --- deteção dos píxeis correspondentes ao objeto, cálculo de uma _bounding box_ e produção da anotação no formato YOLO ---, introduzindo, no entanto, alterações relevantes na forma como a deteção de oclusão (@oclusao) é tratada.
 
 ==== Deteção das máscaras
 
@@ -549,9 +548,7 @@ Para cada uma das duas máscaras, a identificação dos píxeis pertencentes ao 
 
 Um píxel é classificado como pertencente ao objeto na máscara azul quando satisfaz, em simultâneo:
 
-#grid(
-  columns: auto,
-  [
+#align(center)[
   #table(
   columns: (auto, auto),
   align: (left, left),
@@ -560,14 +557,11 @@ Um píxel é classificado como pertencente ao objeto na máscara azul quando sat
   [$R < 80$], [Exclui tons que não sejam azul puro],
   [$G < 80$], [Exclui tons que não sejam azul puro],
 )
-  ]
-)
+]
 
 De forma análoga, na máscara vermelha:
 
-#grid(
-  columns: auto,
-  [
+#align(center)[
   #table(
   columns: (auto, auto),
   align: (left, left),
@@ -576,8 +570,7 @@ De forma análoga, na máscara vermelha:
   [$G < 80$], [Exclui tons que não sejam vermelho puro],
   [$B < 80$], [Exclui tons que não sejam vermelho puro],
 )
-  ]
-)
+]
 
 ==== Classificação por visibilidade
 
@@ -587,9 +580,7 @@ $ "visibility" = "área"_"vermelha" / "área"_"azul" $
 
 A partir desta pontuação, é aplicada a seguinte regra de classificação:
 
-#grid(
-  columns: auto,
-  [
+#align(center)[
   #table(
   columns: (auto, auto),
   align: (left, left),
@@ -598,8 +589,7 @@ A partir desta pontuação, é aplicada a seguinte regra de classificação:
   [$20% - 60%$], [Caso ambíguo --- imagem descartada],
   [$> 60%$], [Objeto visível --- anotação com _bounding box_],
 )
-  ]
-)
+]
 
 Esta regra permite excluir do _dataset_ tanto as imagens em que a sapatilha não está, na prática, presente, como aquelas em que a sua visibilidade é demasiado reduzida para constituir um exemplo de treino fiável, evitando a introdução de ruído na anotação.
 
@@ -613,7 +603,7 @@ Por outro lado, o problema da fragmentação do objeto por oclusão, que em @pos
 
 #pagebreak()
 
-= Recolha das imagens reais
+= Recolha das imagens reais <sec_recolha_real>
 
 Para constituir o conjunto de dados real, destinado tanto ao treino do modelo de referência (Modelo B) como à avaliação final de ambos os modelos, foram captadas fotografias da sapatilha em ambientes reais, procurando reproduzir a diversidade de contextos representada nos cenários sintéticos. No total, foram recolhidas 129 fotografias do objeto, abrangendo variações de iluminação, fundo, distância, ângulo de captura e situações de oclusão parcial, de modo a aproximar o conjunto das condições que um detetor enfrentaria numa aplicação real.
 
@@ -623,7 +613,7 @@ A anotação das imagens reais foi realizada na plataforma Roboflow. Ao contrár
 
 Todas as anotações foram associadas à classe única `Sapatilha` e exportadas no formato YOLO, em coerência com os conjuntos de dados sintéticos, garantindo a uniformidade necessária ao treino e à comparação dos modelos.
 
-= Modelos YOLO e treino dos modelos
+= Modelos YOLO e treino dos modelos <sec_treino>
 
 O sistema de treino desenvolvido está organizado em duas fases principais e sequenciais. Na primeira fase, o _notebook_ `DataPreparation.ipynb` é responsável por toda a preparação dos dados: leitura das imagens e respetivas anotações, conversão de formatos, redimensionamento, augmentação e organização final em conjuntos de treino, validação e teste. Na segunda fase, o _notebook_ `YOLO.ipynb` realiza o treino do modelo de deteção, a validação durante o processo e a comparação final de desempenho.
 
@@ -671,12 +661,15 @@ Para isolar o efeito da origem dos dados, ambos os modelos foram treinados com u
   table(
     columns: (auto, auto),
     align: (left, left),
+    table.hline(),
     table.header([*Parâmetro*], [*Valor*]),
+    table.hline(),
     [Arquitetura], [YOLO26n (≈ 2,5 M parâmetros · 5,8 GFLOPs)],
     [Épocas], [100, com _early stopping_ (_patience_ 20)],
     [Otimizador], [AdamW (automático) · _lr_ ≈ 0,002 · _batch_ 16],
     [Tamanho de imagem], [640 × 640],
     [_Hardware_], [GPU NVIDIA RTX 5070 Ti (CUDA)],
+    table.hline(),
   ),
   caption: [Configuração de treino, idêntica para ambos os modelos.],
 ) <tab_config>
@@ -684,15 +677,33 @@ Para isolar o efeito da origem dos dados, ambos os modelos foram treinados com u
 
 #pagebreak()
 
-= Comparação dos resultados
+= Comparação dos resultados <sec_comparacao>
 
 == Síntese dos dados recolhidos e dos resultados
 
-Concluídas as etapas de geração de dados, treino e avaliação, importa sintetizar os elementos que sustentam a comparação entre as duas abordagens, antes de proceder à sua discussão.
+Concluídas as etapas de geração de dados, treino e avaliação, sintetizam-se nesta secção os elementos que sustentam a comparação entre as duas abordagens, antes de proceder à sua discussão.
 
-Foram constituídos dois conjuntos de dados independentes. O _dataset_ sintético, gerado integralmente em Unreal Engine com anotação automática, era composto por 1257 imagens originais, expandidas para 4016 imagens de treino e 253 de validação após a aplicação de aumentos de dados (_data augmentation_). O _dataset_ real, composto por fotografias do objeto anotadas manualmente, partiu de 129 imagens originais, das quais resultaram 360 imagens de treino, 19 de validação e 20 de teste, igualmente após aumentos. Importa salientar que o conjunto de teste real, constituído por fotografias reais nunca vistas por nenhum dos modelos durante o treino, é único e comum a ambos, constituindo a base sobre a qual assenta a comparação final.
+Foram constituídos dois conjuntos de dados independentes. O _dataset_ sintético, gerado integralmente em Unreal Engine com anotação automática, era composto por 1257 imagens originais. Destas, apenas 224 provieram da Rotina 1 (de posicionamento e rotação manual); as restantes, cerca de 1033, resultaram do _loop_ autónomo da Rotina 2, que permitiu produzir centenas de imagens por hora sem supervisão. O conjunto sintético foi posteriormente expandido para 4016 imagens de treino e 253 de validação após a aplicação de aumentos de dados (_data augmentation_). O _dataset_ real, composto por fotografias do objeto anotadas manualmente, partiu de 129 imagens originais, das quais resultaram 360 imagens de treino, 19 de validação e 20 de teste, igualmente após aumentos. Note-se que o conjunto de teste real, constituído por fotografias reais nunca vistas por nenhum dos modelos durante o treino, é único e comum a ambos, constituindo a base sobre a qual assenta a comparação final.
 
 A partir destes conjuntos foram treinados dois detetores YOLO26n independentes, designados Modelo A (treinado exclusivamente com dados sintéticos) e Modelo B (treinado com dados reais).
+
+== Curvas de treino e convergência
+
+As @fig_curvas_a e @fig_curvas_b apresentam a evolução das funções de perda (_box_, _cls_ e _dfl_, em treino e validação) e das métricas de deteção (_precision_, _recall_, mAP\@50 e mAP\@50-95) ao longo das 100 épocas de treino de cada modelo.
+
+O Modelo A (sintético) exibe uma convergência estável e regular: as curvas de perda decrescem de forma monótona e as métricas de validação sobem suavemente até estabilizarem, refletindo a abundância e a homogeneidade do conjunto de dados sintético. O Modelo B (real), pelo contrário, apresenta curvas visivelmente mais ruidosas, com oscilações acentuadas nas métricas de validação, comportamento consistente com a reduzida dimensão do seu conjunto de validação (19 imagens), em que cada exemplo tem um peso elevado na métrica agregada.
+
+#figure(
+  pad(x: -1cm,
+  image("Imagens/Resultados/MODELOA_results.png", width: 100%)),
+  caption: [Curvas de treino e validação do Modelo A (sintético) ao longo de 100 épocas.],
+) <fig_curvas_a>
+
+#figure(
+  pad(x: -1cm,
+  image("Imagens/Resultados/MODELOB_results.png", width: 100%)),
+  caption: [Curvas de treino e validação do Modelo B (real) ao longo de 100 épocas.],
+) <fig_curvas_b>
 
 == Resultados qualitativos
 
@@ -720,13 +731,16 @@ A @tab_validacao resume as métricas obtidas na validação de cada modelo sobre
   table(
     columns: (auto, auto, auto),
     align: (left, center, center),
+    table.hline(),
     table.header(
       [*Métrica*], [*Modelo A (val. sintética)*], [*Modelo B (val. real)*],
     ),
+    table.hline(),
     [mAP\@50],    [0,950], [0,934],
     [mAP\@50-95], [0,771], [0,660],
     [_Precision_], [0,970], [1,000],
     [_Recall_],    [0,882], [0,882],
+    table.hline(),
   ),
   caption: [Métricas de validação de cada modelo sobre o respetivo conjunto de validação (domínios distintos, não diretamente comparáveis).],
 ) <tab_validacao>
@@ -737,28 +751,33 @@ A @tab_teste apresenta a avaliação de ambos os modelos sobre o conjunto de tes
   table(
     columns: (auto, auto, auto, auto),
     align: (left, center, center, center),
+    table.hline(),
     table.header(
       [*Métrica*], [*Modelo A --- sintético*], [*Modelo B --- real*], [*$Delta$ (p.p.)*],
     ),
+    table.hline(),
     [_Precision_],  [86,8], [79,5], [#text(green)[+7,3]],
     [_Recall_],     [78,9], [73,7], [#text(green)[+5,2]],
     [mAP\@50-95],   [56,5], [51,6], [#text(green)[+4,9]],
     [mAP\@50],      [77,9], [83,1], [#text(red)[−5,2]],
+    table.hline(),
   ),
   caption: [Avaliação de ambos os modelos sobre o conjunto de teste real comum. $Delta$ = Modelo A − Modelo B.],
 ) <tab_teste>
 
 == Discussão
 
-Os resultados sobre o conjunto de teste real revelam um desempenho notável do Modelo A. Treinado exclusivamente com imagens sintéticas, sem nunca ter observado uma única fotografia real durante o treino, este modelo iguala ou supera o Modelo B em três das quatro métricas avaliadas, registando ganhos de 7,3 p.p. em _precision_, 5,2 p.p. em _recall_ e 4,9 p.p. em mAP\@50-95. O Modelo B apenas supera o Modelo A na métrica mAP\@50, por uma margem de 5,2 p.p.
+Os resultados sobre o conjunto de teste real demonstram a eficácia do Modelo A. Treinado exclusivamente com imagens sintéticas, sem nunca ter observado uma única fotografia real durante o treino, este modelo iguala ou supera o Modelo B em três das quatro métricas avaliadas, registando ganhos de 7,3 p.p. em _precision_, 5,2 p.p. em _recall_ e 4,9 p.p. em mAP\@50-95. O Modelo B apenas supera o Modelo A na métrica mAP\@50, por uma margem de 5,2 p.p.
 
 Este resultado sustenta a hipótese central do trabalho: para o objeto em estudo, é possível treinar um detetor funcional em ambiente real recorrendo exclusivamente a dados sintéticos, sem que a transição do domínio virtual para o domínio real degrade significativamente o desempenho da deteção.
 
 A vantagem do Modelo A nas métricas de _precision_ e _recall_, bem como na métrica mAP\@50-95 sugere que a abordagem sintética beneficiou da maior diversidade e do maior volume de dados de treino que a geração automática permitiu obter. A superioridade do Modelo B na métrica mAP\@50, por seu lado, indica que este mantém uma boa capacidade de localização a limiares de IoU menos exigentes, ainda que com menor consistência nos limiares mais elevados.
 
-Importa, contudo, contextualizar esta comparação. Os dois modelos não foram treinados com volumes de dados equivalentes: o volume de dados reais foi substancialmente inferior ao volume de dados sintéticos, o que pode ter limitado o desempenho do Modelo B e introduzido um risco de sobreajuste (_overfitting_), agravado pela reduzida dimensão do seu conjunto de validação (19 imagens). Por esta razão, a comparação não deve ser interpretada como uma medição controlada da qualidade intrínseca de cada fonte de dados, mas antes como uma demonstração de viabilidade da abordagem sintética. Adicionalmente, o realismo do processo de renderização, nomeadamente ao nível dos materiais e da iluminação, constitui um fator determinante na qualidade da transferência do domínio sintético para o real, condicionando os resultados obtidos.
+== Limitações
 
-= Conclusões
+Estes resultados devem, ainda assim, ser lidos com algumas reservas. A limitação mais relevante é o desequilíbrio de volume entre os dois conjuntos: o número de imagens reais foi substancialmente inferior ao de imagens sintéticas, o que pode ter limitado o desempenho do Modelo B e introduzido um risco de sobreajuste (_overfitting_), agravado pela reduzida dimensão do seu conjunto de validação (19 imagens). A comparação não mede, assim, a qualidade intrínseca de cada fonte de dados, mas antes a viabilidade da abordagem sintética. A esta limitação soma-se a dimensão reduzida do conjunto de teste real, com apenas 20 imagens, que confere uma variabilidade estatística considerável às métricas reportadas. Há ainda a ter em conta o realismo do processo de renderização, nomeadamente ao nível dos materiais e da iluminação, fator determinante na qualidade da transferência do domínio sintético para o real e que condiciona os resultados obtidos.
+
+= Conclusões <sec_conclusoes>
 
 Este trabalho propôs-se avaliar a viabilidade da utilização de dados puramente sintéticos no treino de modelos de deteção de objetos aplicáveis ao mundo real. Dos resultados obtidos retiram-se três conclusões principais.
 
@@ -768,12 +787,12 @@ Em segundo lugar, a anotação automática revelou-se um fator decisivo. O _pipe
 
 Em terceiro lugar, a automatização do posicionamento do objeto e da câmara, em conjunto com o ciclo de captura autónomo, aumentou substancialmente a velocidade de produção das imagens sintéticas, permitindo a recolha de centenas de imagens por hora sem qualquer intervenção manual.
 
-No seu conjunto, estes resultados confirmam os dois pontos que o trabalho se propôs validar: a possibilidade de treinar modelos de deteção de objetos reais a partir de imagens sintéticas e a possibilidade de o fazer de forma automatizada, rápida e a uma fração do custo associado à recolha e anotação de imagens reais equivalentes.
+Globalmente, estes resultados confirmam os dois pontos que o trabalho se propôs validar: a possibilidade de treinar modelos de deteção de objetos reais a partir de imagens sintéticas e a possibilidade de o fazer de forma automatizada, rápida e a uma fração do custo associado à recolha e anotação de imagens reais equivalentes.
 
-= Trabalho futuro
+= Trabalho futuro <sec_futuro>
 
 Os resultados obtidos, embora promissores, abrem caminho a diversos desenvolvimentos futuros que permitiriam consolidar e aprofundar as conclusões deste trabalho.
 
-Desde logo, seria relevante realizar uma comparação controlada pelo volume de dados, subamostrando o conjunto sintético de modo a igualar a dimensão do conjunto real. Tal permitiria isolar o efeito da origem dos dados do efeito do seu volume, viabilizando uma comparação mais justa entre as duas abordagens. Em complemento, a constituição de um conjunto de teste real de maior dimensão e diversidade reforçaria a robustez estatística da avaliação e reduziria a variabilidade associada ao reduzido número de imagens atualmente utilizado.
+Uma direção natural seria realizar uma comparação controlada pelo volume de dados, subamostrando o conjunto sintético de modo a igualar a dimensão do conjunto real. Tal permitiria isolar o efeito da origem dos dados do efeito do seu volume, viabilizando uma comparação mais justa entre as duas abordagens. Seria igualmente útil constituir um conjunto de teste real de maior dimensão e diversidade, o que reforçaria a robustez estatística da avaliação e reduziria a variabilidade associada ao reduzido número de imagens atualmente utilizado.
 
-Por fim, a aplicação de técnicas adicionais de _domain randomization_ no Unreal Engine, introduzindo maior variabilidade ao nível das texturas, da iluminação e dos cenários, poderia melhorar ainda mais a capacidade de generalização dos modelos treinados sinteticamente, aproximando o domínio sintético da diversidade encontrada em ambiente real e potenciando a qualidade da transferência para o mundo real.
+Haveria ainda margem para aplicar técnicas adicionais de _domain randomization_ no Unreal Engine, introduzindo maior variabilidade ao nível das texturas, da iluminação e dos cenários. Tal poderia melhorar a capacidade de generalização dos modelos treinados sinteticamente, aproximando o domínio sintético da diversidade encontrada em ambiente real e potenciando a qualidade da transferência para o mundo real.

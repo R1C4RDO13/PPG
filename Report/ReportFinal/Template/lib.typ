@@ -153,7 +153,7 @@
   show figure.where(kind: table): set figure.caption(position: top) // caption for table above figure
   show figure.where(kind: image): set image(width: 100%)
   show figure: set text(9pt)
-  show figure: set align(left)
+  show figure: set align(center)
   set figure(gap: 4.5mm, placement: none)
   show figure: it => {
     if (
@@ -298,7 +298,7 @@
       #set par(justify: true)
       #set text(size: 9pt)
       #if abstract != [] [
-        *Abstrato.* #abstract
+        *Resumo.* #abstract
       ]
       #if keywords.len() > 0 {
         v(4.5mm)
